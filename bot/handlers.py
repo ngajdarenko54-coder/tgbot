@@ -215,7 +215,7 @@ async def on_apply(cb: CallbackQuery, jobs: JobsHolder, storage: Storage, cfg: C
     storage.log(chat_id, "apply", job.offer_id)
     url = job.link_with_subid(cfg.subid_param, storage.user_code(chat_id))
     await cb.message.answer(texts.APPLY.format(title=html.escape(job.title)), reply_markup=InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="Перейти к анкете работодателя", url=url)]]))
+        inline_keyboard=[[InlineKeyboardButton(text="Перейти к анкете", url=url)]]))
     guide = [texts.GUIDE_COMMON] + [texts.GUIDE_BY_CATEGORY[c] for c in sorted(job.categories)
                                     if c in texts.GUIDE_BY_CATEGORY]
     await cb.message.answer("\n\n".join(guide))

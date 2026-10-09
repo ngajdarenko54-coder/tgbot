@@ -65,12 +65,19 @@ def test_courier_without_license_gets_yandex_first(xlsx):
     assert 2682 not in [j.offer_id for j in found]  # Купер выключен (active=0)
 
 
-def test_truck_driver_needs_license_c(xlsx):
+def test_truck_driver_needs_license_and_vehicle(xlsx):
     jobs = load_jobs(xlsx)
-    no_c = match_jobs(jobs, Answers(age=25, category="driver", license_b=True, hours=60, schedule="full"))
-    with_c = match_jobs(jobs, Answers(age=25, category="driver", license_b=True, license_c=True,
-                                      hours=60, schedule="full"))
-    assert no_c == [] and [j.offer_id for j in with_c] == [2864]
+    no_lic = match_jobs(jobs, Answers(age=25, category="driver", hours=60, schedule="full"))
+    no_car = match_jobs(jobs, Answers(age=25, category="driver", license_b=True, hours=60, schedule="full"))
+    ok = match_jobs(jobs, Answers(age=25, category="driver", license_b=True, has_car=True,
+                                  hours=60, schedule="full"))
+    assert no_lic == [] and no_car == [] and [j.offer_id for j in ok] == [2864]
+
+
+def test_only_offers_allowing_chatbots_are_active():
+    jobs = load_jobs(str(ROOT / "data" / "jobs.xlsx"))
+    active = sorted(j.offer_id for j in jobs if j.active and j.link)
+    assert active == [2085, 2304, 2501, 2864, 2866]
 
 
 def test_relaxes_schedule_but_not_category(xlsx):
@@ -167,7 +174,7 @@ def test_full_dialog(xlsx, tmp_path):
         await click("hrs:20")
         await click("sch:flex")
         cards = texts_of(session)
-        assert any("Курьер Яндекс.Еды" in t for t in cards)
+        assert any("Курьер-партнёр сервиса Яндекс Еда" in t for t in cards)
 
         await click("apply:2304")
         apply_msg = [m for m in session.sent if isinstance(m, SendMessage) and m.reply_markup
@@ -204,6 +211,6 @@ def test_under_18_and_remote_question(xlsx, tmp_path):
             await click(d)
         assert texts_of(session)[-1].startswith("Удалённая работа")
         await click("rem:only")
-        assert any("Тетрик" in t for t in texts_of(session))
+        assert any("Без оклада" in t for t in texts_of(session))  # удалёнка: агентские офферы
 
     asyncio.run(scenario())
