@@ -33,7 +33,9 @@ NOTHING = (
     "с другими вариантами или подпишись на канал — новые вакансии появляются регулярно."
 )
 
-JOB_CARD = "<b>{title}</b>\n\n{description}{pay}\n\n<i>Что понадобится:</i> {requirements}"
+JOB_CARD = "<b>{title}</b>\n\n{description}{pay}\n\n<i>Что понадобится:</i> {requirements}{ad}"
+# Маркировка рекламы (ФЗ «О рекламе»): erid берётся из ссылки, рекламодатель — из колонки advertiser
+AD_LABEL = "\n\n<i>Реклама{advertiser}. erid: {erid}</i>"
 
 APPLY = (
     "Отлично! Вот ссылка на анкету работодателя: <b>{title}</b>.\n\n"

@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.fixture()
 def xlsx(tmp_path):
-    """Копия базы со всеми ссылками заполненными (в реальном файле их пока нет)."""
+    """Копия базы, где ссылки есть у всех вакансий (в реальном файле у 2465 её нет)."""
     path = tmp_path / "jobs.xlsx"
     shutil.copy(ROOT / "data" / "jobs.xlsx", path)
     wb = load_workbook(path)
@@ -35,10 +35,26 @@ def xlsx(tmp_path):
     return str(path)
 
 
-def test_real_file_loads_and_hides_jobs_without_links():
-    jobs = load_jobs(str(ROOT / "data" / "jobs.xlsx"))
+def test_real_file_links():
+    jobs = {j.offer_id: j for j in load_jobs(str(ROOT / "data" / "jobs.xlsx"))}
     assert len(jobs) == 16
-    assert match_jobs(jobs, Answers(age=20)) == []  # ссылок ещё нет → ничего не показываем
+    with_links = {i for i, j in jobs.items() if j.link}
+    assert len(with_links) == 13 and 2465 not in with_links
+    for i in with_links:
+        assert jobs[i].link.startswith("https://trk.ppdu.ru/click/") and jobs[i].erid
+    shown = match_jobs(list(jobs.values()), Answers(age=20), limit=50)
+    ids = {j.offer_id for j in shown}
+    assert 2465 not in ids and 2682 not in ids  # без ссылки / выключен
+    courier = match_jobs(list(jobs.values()), Answers(age=19, category="courier", hours=20, schedule="flex"))
+    assert courier[0].offer_id == 2304
+
+
+def test_subid_keeps_erid_and_card_has_ad_label():
+    from bot.handlers import job_card
+    job = next(j for j in load_jobs(str(ROOT / "data" / "jobs.xlsx")) if j.offer_id == 1570)
+    url = job.link_with_subid("sub1", "abc123")
+    assert "erid=2SDnjcXP37s" in url and url.endswith("sub1=abc123")
+    assert "Реклама" in job_card(job) and "erid: 2SDnjcXP37s" in job_card(job)
 
 
 def test_courier_without_license_gets_yandex_first(xlsx):

@@ -166,8 +166,12 @@ async def on_remote(cb: CallbackQuery, state: FSMContext, jobs: JobsHolder, cfg:
 def job_card(job: Job) -> str:
     e = html.escape
     pay = f"\n\n💰 {e(job.pay_text)}" if job.pay_text else ""
+    ad = ""
+    if job.erid:
+        adv = f". {e(job.advertiser)}" if job.advertiser else ""
+        ad = texts.AD_LABEL.format(advertiser=adv, erid=e(job.erid))
     return texts.JOB_CARD.format(title=e(job.title), description=e(job.description), pay=pay,
-                                 requirements=e(job.requirements or "паспорт"))
+                                 requirements=e(job.requirements or "паспорт"), ad=ad)
 
 
 async def show_results(cb: CallbackQuery, state: FSMContext, jobs: JobsHolder, cfg: Config, storage: Storage):

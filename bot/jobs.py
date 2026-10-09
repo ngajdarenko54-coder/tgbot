@@ -42,6 +42,12 @@ class Job:
     link: str
     priority: int
     active: bool
+    advertiser: str = ""
+
+    @property
+    def erid(self) -> str:
+        """Токен маркировки рекламы из партнёрской ссылки (?erid=...)."""
+        return dict(parse_qsl(urlparse(self.link).query)).get("erid", "")
 
     def link_with_subid(self, param: str, subid: str) -> str:
         parts = urlparse(self.link)
@@ -63,6 +69,7 @@ def load_jobs(path: str) -> list[Job]:
     if missing:
         raise ValueError("Не хватает колонок: " + ", ".join(missing))
     idx = {name: header.index(name) for name in REQUIRED_COLUMNS}
+    adv_idx = header.index("advertiser") if "advertiser" in header else None
 
     jobs: list[Job] = []
     for n, row in enumerate(rows[1:], start=2):
@@ -88,6 +95,7 @@ def load_jobs(path: str) -> list[Job]:
                 link=str(get("link") or "").strip(),
                 priority=_int(get("priority"), 999),
                 active=bool(_int(get("active"), 1)),
+                advertiser=str(row[adv_idx] or "").strip() if adv_idx is not None and adv_idx < len(row) else "",
             ))
         except (TypeError, ValueError) as e:
             raise ValueError(f"Строка {n}: не получилось прочитать ({e})") from e
