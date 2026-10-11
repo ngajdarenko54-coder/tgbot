@@ -51,6 +51,20 @@ journalctl -u tgbot -f      # смотреть логи
 cd tgbot && git pull && sudo systemctl restart tgbot
 ```
 
+## Если сервер в РФ и Telegram недоступен
+
+Проверка: `curl -sS -m 15 -o /dev/null -w "%{http_code}\n" https://api.telegram.org` — если `000` или таймаут, нужен туннель.
+
+1. Арендуй самый дешёвый сервер за рубежом (Ubuntu). Устанавливать на нём ничего не нужно, нужен только вход по SSH под root.
+2. На сервере с ботом:
+```bash
+cd ~/tgbot && git pull && .venv/bin/pip install -r requirements.txt
+bash deploy/setup_tunnel.sh IP_ЗАРУБЕЖНОГО_СЕРВЕРА
+```
+3. В `.env` добавь `TELEGRAM_PROXY=socks5://127.0.0.1:1080` и запусти бота.
+
+Данные пользователей остаются на сервере в РФ, через зарубежный сервер идут только зашифрованные запросы к Telegram. Туннель работает как служба `tg-tunnel` и сам переподключается.
+
 ## Команды
 
 | Команда | Кто | Что делает |

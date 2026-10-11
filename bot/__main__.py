@@ -3,6 +3,7 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 
 from .config import load_config
@@ -31,7 +32,12 @@ async def main() -> None:
     if active == 0:
         logging.warning("Ни у одной вакансии нет ссылки (колонка link) — бот ничего не покажет")
 
-    bot = Bot(cfg.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    session = None
+    if cfg.telegram_proxy:
+        # Например socks5://127.0.0.1:1080 — SSH-туннель через зарубежный сервер
+        session = AiohttpSession(proxy=cfg.telegram_proxy)
+        logging.info("Связь с Telegram через прокси %s", cfg.telegram_proxy.split("@")[-1])
+    bot = Bot(cfg.bot_token, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
     dp.include_router(router)
     dp["cfg"], dp["storage"], dp["jobs"] = cfg, storage, jobs

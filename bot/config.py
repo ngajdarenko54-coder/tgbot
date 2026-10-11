@@ -25,6 +25,7 @@ class Config:
     followup_hours: int
     db_path: str
     jobs_xlsx: str
+    telegram_proxy: str = ""
 
 
 def load_config() -> Config:
@@ -38,4 +39,5 @@ def load_config() -> Config:
         followup_hours=int(os.getenv("FOLLOWUP_HOURS", "48")),
         db_path=os.getenv("DB_PATH", "data/bot.db"),
         jobs_xlsx=os.getenv("JOBS_XLSX", "data/jobs.xlsx"),
+        telegram_proxy=os.getenv("TELEGRAM_PROXY", "").strip(),
     )
