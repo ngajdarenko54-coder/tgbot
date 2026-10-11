@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
-  <rect width="640" height="640" fill="#FFFFFF"/>
+  <rect width="640" height="640" fill="#1B4D3E"/>
   <!-- арка «П» — проход -->
   <path d="M215 480 V250 Q215 185 280 185 H360 Q425 185 425 250 V480"
-        fill="none" stroke="#1B4D3E" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+        fill="none" stroke="#FFFFFF" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- маршрут, ведущий через проход -->
   <path d="M262 575 Q322 500 320 350"
         fill="none" stroke="#F28C28" stroke-width="22" stroke-linecap="round" stroke-dasharray="0 36"/>
   <!-- точка назначения -->
   <circle cx="320" cy="300" r="34" fill="#F28C28"/>
-  <circle cx="320" cy="300" r="13" fill="#FFFFFF"/>
+  <circle cx="320" cy="300" r="13" fill="#1B4D3E"/>
 </svg>
