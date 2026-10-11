@@ -36,13 +36,16 @@ async def main() -> None:
     if cfg.telegram_proxy:
         # Например socks5://127.0.0.1:1080 — SSH-туннель через зарубежный сервер
         session = AiohttpSession(proxy=cfg.telegram_proxy)
+        # Прокси часто обрывают переиспользуемые соединения (ServerDisconnectedError):
+        # открываем новое соединение на каждый запрос и держим long polling коротким.
+        session._connector_init["force_close"] = True
         logging.info("Связь с Telegram через прокси %s", cfg.telegram_proxy.split("@")[-1])
     bot = Bot(cfg.bot_token, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
     dp.include_router(router)
     dp["cfg"], dp["storage"], dp["jobs"] = cfg, storage, jobs
     asyncio.create_task(followup_loop(bot, storage, jobs))
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, polling_timeout=5 if cfg.telegram_proxy else 10)
 
 
 if __name__ == "__main__":
